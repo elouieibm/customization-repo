@@ -33,7 +33,6 @@
                     console.log("**");
                     //console.log(targetNode);
 					//connsole.log(mutation.addedNodes);
-
                     var ul = getULNode(mutation.addedNodes[0]);
                     if(ul != null) {
                         addFAILinks(ul);
@@ -77,49 +76,6 @@
           }
       }
 
-      function getCommentData(faiNode) {
-          console.log(faiNode);
-          //console.log(node.parentElement);
-          //var x = document.evaluate( "ancestor::div[@class='lotusPostAuthorInfo']", faiNode, null, XPathResult.ANY_TYPE, null );
-          //var x = document.evaluate( "ancestor::div[@class='lotusPostContent']/preceding-sibling::div", faiNode, null, XPathResult.ANY_TYPE, null );
-          //var x = document.evaluate( "ancestor::div[@class='lotusPostContent']/preceding-sibling::div", faiNode, null, XPathResult.ANY_TYPE, null );
-          //var lotusPost = document.evaluate( "ancestor::div[contains(@class, 'lotusPost')]", faiNode, null, XPathResult.ANY_TYPE, null );
-
-          //Get the CommentPosting
-          var lotusPost = document.evaluate( "ancestor::div[contains(@class, 'lotusPost lotusStatus lotusBoard')]", faiNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null ).singleNodeValue;
-          console.log(lotusPost);
-          var lotusPostAuthorInfo = document.evaluate( "div[contains(@class, 'lotusPostAuthorInfo')]", lotusPost, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null ).singleNodeValue;
-          var lotusPostContent = document.evaluate( "div[contains(@class, 'lotusPostContent')]", lotusPost, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null ).singleNodeValue;
-          var lotusPostAvatar = document.evaluate( "div[contains(@class, 'lotusPostAvatar')]", lotusPostAuthorInfo, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null ).singleNodeValue;
-          var photoUrl = document.evaluate( "img/@src", lotusPostAvatar, null, XPathResult.STRING_TYPE, null ).stringValue;
-          var authorName = document.evaluate( "div[@class='lotusMeta']/a/@aria-label", lotusPostContent, null, XPathResult.STRING_TYPE, null ).stringValue;
-          var contentId = document.evaluate( "a/@id", lotusPost, null, XPathResult.STRING_TYPE, null ).stringValue;
-          var contentContent = document.evaluate( "div[@class='lotusPostDetails']/p", lotusPostContent, null, XPathResult.STRING_TYPE, null ).stringValue;
-
-         // console.debug(lotusPostAuthorInfo);
-         // console.debug(lotusPostAvatar);
-         // console.debug(photoUrl);
-         // console.debug(authorName);
-
-
-          //iterateXPathResults(lotusPostAuthorInfo);
-
-          console.log("$$$ " + getUrlParameter(photoUrl,"userid"));
-
-          return {      communityUuid : ic_comm_communityUuid,
-						contentAuthorGuid: getUrlParameter(photoUrl,"userid"),
-						contentAuthorName: authorName,
-						contentId: contentId,
-						contentContent: contentContent
-						//contentPublished: statusTimeStamp
-						//flagReason: dojo.byId("cust_input_comment_for_comment").value
-						//flagUserGuid: flagOwnerId,
-						//flagUserName: flagOwner,
-						//containerId: containerId
-                 };
-
-      }
-
     function getCommentId(faiNode) {
         var lotusPost = document.evaluate( "ancestor::div[contains(@class, 'lotusPost lotusStatus lotusBoard')]", faiNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null ).singleNodeValue;
         return document.evaluate( "a/@id", lotusPost, null, XPathResult.STRING_TYPE, null ).stringValue.substr(8, 36);
@@ -132,11 +88,10 @@
         return feedUrl;
     }
 
-    function customFlagPopup(feedUrl){
+    function customFlagPopup(commentData){
            require(
 					[ "dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/on" ],
 					function(domConstruct, domStyle, lang, on) {
-                        console.log(event);
                         var custFlagEntryCommentDiv = domConstruct.create("div", {id : 'custFlagEntryCommentDiv',
                                                                                 style : 'background-color:#ffffff',
                                                                                innerHTML : "<div class='lotusDialogHeader' style='background-color: #F2F2F2;background-image: none;border: medium none #CCCCCC;border-radius: 0 0 0 0;box-shadow: none;color: #444444;font-size: 1.2em;line-height: 1.2;margin: 0;padding: 8px 0 8px 10px;text-align: center;'><h1 class='lotusHeading' style='color: #444444;font-size: 1.2em;line-height: 1.2;text-align: left;'>Flag as inappropriate</h1></div><div class='lotusDialogContent' style='max-height: 200px;overflow: auto;padding: 5px 10px;'><div class='lotusFormField'><label for='cust_input_comment_for_comment'>Provide a reason for flagging this entry (optional):</label><div><textarea id='cust_input_comment_for_comment' style='width:80%' rows='7' name='comment' title='Provide a reason for flagging this entry (optional):'></textarea></div></div></div><div class='lotusDialogFooter' style='background-color: #FFFFFF;border-top: 1px solid #CCC3B2;margin: 0 10px;padding: 15px 0;text-align:right;'><input id='custFlagCommentSubmitButton' class='lotusFormButton blogsPaddingRight' type='button' value='OK' name='submitBtn' style='background-color: #0066AE;background-image: none;border: 1px solid #005097;border-radius: 0 0 0 0;box-shadow: none;color: #FFFFFF;display: inline-block;font-weight: bold;margin-right: 3px;padding: 6px 10px;text-decoration: none;text-shadow: 1px 1px 0 #1570CD;'><input id='custFlagCommentCancelButton' class='lotusFormButton blogsPaddingRight' type='button' value='Cancel' name='cancelBtn' style='background-color: #0066AE;background-image: none;border: 1px solid #005097;border-radius: 0 0 0 0;box-shadow: none;color: #FFFFFF;display: inline-block;font-weight: bold;margin-right: 3px;padding: 6px 10px;text-decoration: none;text-shadow: 1px 1px 0 #1570CD;'></div>"
@@ -156,18 +111,18 @@
                             setTimeout(function() { eWidgForm.destroyRecursive(); }, 0);
                         });
 
-                       // var dataNode = event.target;
-                       // var commentDataJSON = getCommentData(event.target);
-                       // console.log("### communityUuid=" + commentDataJSON.communityUuid );
-                       // console.log("### contentAuthorGuid=" + commentDataJSON.contentAuthorGuid );
-                       // console.log("### contentAuthorName=" + commentDataJSON.contentAuthorName );
-                       // console.log("### contentId=" + commentDataJSON.contentId );
-                       // console.log("### contentId=" + commentDataJSON.contentContent );
+                        dojo.connect(flagSubmitCommentButton, "onclick", function() {
+                            commentData.flagReason=dojo.byId("cust_input_comment_for_comment").value;
+                            console.log(commentData);
+                            var commentDataJson = dojo.toJson(commentData);
 
 
+                            console.log(commentDataJson);
+                      setTimeout(function() { eWidgForm.destroyRecursive(); }, 0);
+                      }); //dojo connect
 
-                    }) //function
-    }
+                    }) //require
+    } //function
 
     function resolver(prefix) {
         switch (prefix) {
@@ -189,15 +144,23 @@
         //console.log(xmlDoc.documentElement);
         var entry=document.evaluate("/a:entry[./a:id='urn:lsid:ibm.com:td:"+commentId+"']", xmlDoc.documentElement, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
         //iterateXPathResults(entry);
-        var contentAuthorGuid = document.evaluate("/a:author/snx:userid/text()", entry, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-        var contentAuthorName = document.evaluate("/a:author/a:name/text()", entry, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-        var contentContent = document.evaluate("/a:content/text()", entry, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-        var statusTimeStamp = document.evaluate("/a:updated/text()", entry, resolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-        console.log(entry);
-        console.log(contentAuthorGuid);
-        console.log(contentAuthorName);
-        console.log(contentContent);
-        console.log(statusTimeStamp);
+        var contentAuthorGuid = document.evaluate("/a:author/snx:userid/text()", entry, resolver, XPathResult.STRING_TYPE, null).stringValue;
+        var contentAuthorName = document.evaluate("/a:author/a:name/text()", entry, resolver, XPathResult.STRING_TYPE, null).stringValue;
+        var contentContent = document.evaluate("/a:content/text()", entry, resolver, XPathResult.STRING_TYPE, null).stringValue;
+        var statusTimeStamp = document.evaluate("/a:updated/text()", entry, resolver, XPathResult.STRING_TYPE, null).stringValue;
+        var ts = (new Date(statusTimeStamp).getTime());
+        //console.log(entry);
+        //console.log(contentAuthorGuid);
+        //console.log(contentAuthorName);
+        //console.log(contentContent);
+        //console.log(statusTimeStamp);
+        return {"commentId"         : commentId,
+                "communityUuid"     : ic_comm_communityUuid,
+                "contentAuthorGuid" : contentAuthorGuid,
+                "contentAuthorName" : contentAuthorName,
+                "contentContent"    : contentContent,
+                "statusTimeStamp"   : ts
+               }
     }
 
     function getFeed(feedUrl,commentId) {
@@ -207,8 +170,9 @@
             load: function(data){
                 console.log(commentId);
                 console.debug(new XMLSerializer().serializeToString(data.documentElement));
-                var x = parseXml(data,commentId);
-                //console.log(x);
+                var commentData = parseXml(data,commentId);
+                console.log("communityUuid="+commentData.communityUuid);
+                customFlagPopup(commentData);
             },
             error: function(error){
 
